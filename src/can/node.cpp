@@ -144,7 +144,7 @@ namespace myactuator_rmd {
       return write(frame.getId(), frame.getData());
     }
 
-    void Node::write(std::uint32_t const can_id, std::array<std::uint8_t,8> const& data) {
+    void Node::write(std::uint32_t const can_id, std::array<std::uint8_t,8> const& data) { // write to CAN bus
       struct ::can_frame frame {};
       frame.can_id = can_id;
       frame.len = 8;

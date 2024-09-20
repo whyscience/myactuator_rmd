@@ -2,7 +2,14 @@
 
 Author: [Tobit Flatscher](https://github.com/2b-t) (2023 - 2024)
 
+## install the driver
 
+	for Ubuntu 22.04: sudo ln -s -f /usr/bin/gcc-12 /usr/bin/gcc
+    https://askubuntu.com/questions/1500017/ubuntu-22-04-default-gcc-version-does-not-match-version-that-built-latest-default
+
+    # install the driver https://gist.github.com/pranav083/6be974e881ffa494e8096e5c7eb90c23
+    
+    https://github.com/2b-t/myactuator_rmd/blob/main/doc/Setup.md
 
 ## 0. Connecting to CAN
 The actuator will require a **24-48V power supply** able to deliver **at least 5A**. I am using a [generic Chinese 48V 10A (480W) S-480-48 power supply from Amazon](https://www.amazon.co.uk/dp/B084KYD2TL). I simply modified a [socket extension lead](https://www.amazon.co.uk/dp/B0839VFYG9) and attached it to the power outlet and connected the actuator through a [XT30 connector](https://www.amazon.co.uk/dp/B07PC1YKVW).
@@ -46,7 +53,9 @@ In my case this outputs a device `can0` of the type `link/can`.
 Then continue to **configure the CAN interface** with
 
 ```bash
-$ sudo ip link set can0 up type can bitrate 500000
+ #sudo ip link set can0 up type can bitrate 500000
+ # MUST BE 1Mbit/s for the RMD-L series
+ sudo ip link set can0 up type can bitrate 1000000
 ```
 
 where the interface name (in our case `can0`) must correspond to the previously outputted one and the baud rate has to correspond to the one configured for your drive through the Assistant 3.0 GUI previously.

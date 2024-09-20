@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(myactuator_rmd VERSION 0.0.1)
 
-option(PYTHON_BINDINGS "Building Python bindings" OFF)
-option(BUILD_TESTING "Build unit and integration tests" OFF)
-option(SETUP_TEST_IFNAME "Set-up the test VCAN interface automatically" OFF)
+option(PYTHON_BINDINGS "Building Python bindings" ON)
+option(BUILD_TESTING "Build unit and integration tests" ON)
+option(SETUP_TEST_IFNAME "Set-up the test VCAN interface automatically" ON)
 
 if (CMAKE_COMPILER_IS_GNUCC AND BUILD_TESTING)
   option(ENABLE_COVERAGE "Enable coverage reporting for GCC/Clang" OFF)
@@ -137,3 +137,9 @@ else()
     DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
   )
 endif()
+
+
+add_executable(mytest
+        src/mytest.cpp
+)
+target_link_libraries(mytest PUBLIC myactuator_rmd)
