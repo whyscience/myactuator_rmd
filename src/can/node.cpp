@@ -157,7 +157,7 @@ namespace myactuator_rmd {
       return;
     }
 
-    void Node::initSocket(std::string const& ifname) {
+    void Node::initSocket(std::string const& ifname) {//
       ifname_ = ifname;
       socket_ = ::socket(PF_CAN, SOCK_RAW, CAN_RAW);
       if (socket_ < 0) {

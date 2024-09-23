@@ -2,3 +2,5 @@
 build/
 myactuator_rmd_py.egg-info/
 
+/cmake-build-debug/
+/.idea/
