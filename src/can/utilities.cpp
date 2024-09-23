@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <ostream>
 
-#include <linux/can.h>
+#include "myactuator_rmd/can/linux_can.h"
 
 
 std::ostream& operator << (std::ostream& os, struct ::can_frame const& frame) noexcept {

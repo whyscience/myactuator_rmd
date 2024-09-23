@@ -14,9 +14,10 @@
 #include <system_error>
 #include <vector>
 
-#include <linux/can.h>
-#include <linux/can/error.h>
-#include <linux/can/raw.h>
+#include "myactuator_rmd/can/linux_can.h"
+// #include <linux/can/error.h>
+// #include <linux/can/raw.h>
+
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -49,9 +50,9 @@ namespace myactuator_rmd {
 
     void Node::setLoopback(bool const is_loopback) {
       int const recv_own_msgs {static_cast<int>(is_loopback)};
-      if (::setsockopt(socket_, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS, &recv_own_msgs, sizeof(int)) < 0) {
+      /* if (::setsockopt(socket_, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS, &recv_own_msgs, sizeof(int)) < 0) {
         throw SocketException(errno, std::generic_category(), "Interface '" + ifname_ + "' - Could not configure loopback");
-      }
+      } */
       return;
     }
 
@@ -67,9 +68,9 @@ namespace myactuator_rmd {
         }
         filters[i].can_mask = CAN_SFF_MASK;
       }
-      if (::setsockopt(socket_, SOL_CAN_RAW, CAN_RAW_FILTER, filters.data(), sizeof(::can_filter)*filters.size()) < 0) {
+      /* if (::setsockopt(socket_, SOL_CAN_RAW, CAN_RAW_FILTER, filters.data(), sizeof(::can_filter)*filters.size()) < 0) {
         throw SocketException(errno, std::generic_category(), "Interface '" + ifname_ + "' - Could not configure read filter");
-      }
+      } */
       return;
     }
 
@@ -92,13 +93,13 @@ namespace myactuator_rmd {
     void Node::setErrorFilters(bool const is_signal_errors) {
       // See https://github.com/linux-can/can-utils/blob/master/include/linux/can/error.h
       ::can_err_mask_t err_mask {};
-      if (is_signal_errors) {
+      /* if (is_signal_errors) {
         err_mask = (CAN_ERR_TX_TIMEOUT | CAN_ERR_LOSTARB | CAN_ERR_CRTL | CAN_ERR_PROT | CAN_ERR_TRX | 
                     CAN_ERR_ACK | CAN_ERR_BUSOFF | CAN_ERR_BUSERROR | CAN_ERR_RESTARTED);
       }
       if (::setsockopt(socket_, SOL_CAN_RAW, CAN_RAW_ERR_FILTER, &err_mask, sizeof(::can_err_mask_t)) < 0) {
         throw SocketException(errno, std::generic_category(), "Interface '" + ifname_ + "' - Error setting error acknowledgement");
-      }
+      } */
       return;
     }
 
@@ -109,7 +110,7 @@ namespace myactuator_rmd {
       }
       // We will only receive these frames if the corresponding error mask is set
       // See https://github.com/linux-can/can-utils/blob/master/include/linux/can/error.h
-      if (frame.can_id & CAN_ERR_FLAG){
+      /* if (frame.can_id & CAN_ERR_FLAG){
         std::ostringstream ss {};
         ss << frame;
         if (frame.can_id & CAN_ERR_TX_TIMEOUT) {
@@ -133,7 +134,7 @@ namespace myactuator_rmd {
         } else {
           throw Exception("Unknown CAN protocol error: CAN frame '" + ss.str() + "'");
         }
-      }
+      } */
       std::array<std::uint8_t,8> data {};
       std::copy(std::begin(frame.data), std::end(frame.data), std::begin(data));
       Frame const f {frame.can_id, data};
@@ -158,7 +159,7 @@ namespace myactuator_rmd {
     }
 
     void Node::initSocket(std::string const& ifname) {//
-      ifname_ = ifname;
+      /* ifname_ = ifname;
       socket_ = ::socket(PF_CAN, SOCK_RAW, CAN_RAW);
       if (socket_ < 0) {
         throw SocketException(errno, std::generic_category(), "Interface '" + ifname_ + "' - Error creating socket");
@@ -175,7 +176,7 @@ namespace myactuator_rmd {
       addr.can_ifindex = ifr.ifr_ifindex;
       if (::bind(socket_, reinterpret_cast<struct ::sockaddr*>(&addr), sizeof(addr)) < 0) {
         throw SocketException(errno, std::generic_category(), "Interface '" + ifname_ + "' - Error assigning address to socket");
-      }
+      } */
       return;
     }
 

@@ -14,7 +14,7 @@
 #include <ostream>
 #include <ratio>
 
-#include <linux/can.h>
+#include "linux_can.h"
 #include <sys/time.h>
 
 
