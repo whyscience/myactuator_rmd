@@ -12,6 +12,8 @@
 
 #include <array>
 #include <cstdint>
+#include <iomanip>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -140,6 +142,12 @@ namespace myactuator_rmd {
   std::array<std::uint8_t,8> CanNode<SEND_ID_OFFSET,RECEIVE_ID_OFFSET>::sendRecv(Message const& request, std::uint32_t const actuator_id) {
     auto const can_send_id {getCanSendId(actuator_id)};
     write(can_send_id, request.getData());
+    // print id and data
+    std::cout << "Sending to: " << can_send_id << ", Data: ";
+    for (auto const& d: request.getData()) {
+      std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(d) << " ";
+    }
+    std::cout << std::endl;
     can::Frame const frame {can::Node::read()};
     return frame.getData();
   }

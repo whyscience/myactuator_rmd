@@ -2,7 +2,7 @@ import can
 import time
 
 # Setup the CAN interface
-def setup_can_interface(interface='can0', bitrate=500000):
+def setup_can_interface(interface='can0', bitrate=1000000):
     try:
         bus = can.interface.Bus(channel=interface, bustype='socketcan', bitrate=bitrate)
         print("CAN Receiver initialized")
@@ -11,7 +11,7 @@ def setup_can_interface(interface='can0', bitrate=500000):
         print(f"Error setting up CAN interface: {e}")
         exit(1)
 
-# Function to receive and process CAN messages
+# Function to receive and process CAN message
 def receive_can_messages(bus):
     idx = 0
     while True:
