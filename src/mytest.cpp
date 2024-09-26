@@ -10,6 +10,7 @@ int main() {
     std::cout << "init " << std::endl;
     myactuator_rmd::ActuatorInterface actuator {driver, 1};
 
+    //sudo ip link set can0 up type can bitrate 1000000
     std::cout << "getVersionDate: " << actuator.getVersionDate() << std::endl;
     std::cout << "sendPositionAbsoluteSetpoint: " << actuator.sendPositionAbsoluteSetpoint(180.0, 500.0) << std::endl;
     sleep(3);
