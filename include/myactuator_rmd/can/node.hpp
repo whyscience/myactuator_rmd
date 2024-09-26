@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "myactuator_rmd/can/frame.hpp"
-#include "CAN.h"
+#include <esp32_can.h>
 
 
 namespace myactuator_rmd {

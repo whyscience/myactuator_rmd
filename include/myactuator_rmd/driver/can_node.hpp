@@ -141,8 +141,18 @@ namespace myactuator_rmd {
   std::array<std::uint8_t,8> CanNode<SEND_ID_OFFSET,RECEIVE_ID_OFFSET>::sendRecv(Message const& request, std::uint32_t const actuator_id) {
     auto const can_send_id {getCanSendId(actuator_id)};
     Serial.println("Sending write");
+    //print the id and data
+    Serial.print("sendRecv ID: ");
+    Serial.println(can_send_id, HEX);
+    Serial.print("Data: ");
+    for (int i = 0; i < request.getData().size(); i++) {
+      Serial.print(request.getData()[i], HEX);
+      Serial.print(" ");
+    }
+    Serial.println();
     write(can_send_id, request.getData());
     Serial.println("Sent write");
+    // return {0, 0, 0, 0, 0, 0, 0, 0};
     can::Frame const frame {can::Node::read()};
     Serial.println("Received read");
     return frame.getData();

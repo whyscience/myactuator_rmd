@@ -17,6 +17,7 @@
 #include "myactuator_rmd/exceptions.hpp"
 
 #include "freertos/FreeRTOS.h"
+#include <HardwareSerial.h>
 
 namespace myactuator_rmd {
 
@@ -167,6 +168,7 @@ namespace myactuator_rmd {
   Feedback ActuatorInterface::sendVelocitySetpoint(float const speed) {
     SetVelocityRequest const request {speed};
     SetVelocityResponse const response {driver_.sendRecv(request, actuator_id_)};
+    Serial.println ("sendVelocitySetpoint done");
     return response.getStatus();
   }
 
