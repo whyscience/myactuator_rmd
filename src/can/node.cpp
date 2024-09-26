@@ -29,6 +29,8 @@
 #include "myactuator_rmd/can/frame.hpp"
 #include "myactuator_rmd/can/utilities.hpp"
 
+#include "freertos/FreeRTOS.h"
+
 
 namespace myactuator_rmd {
   namespace can {
@@ -115,57 +117,112 @@ namespace myactuator_rmd {
       return;
     }*/
 
-    Frame Node::read() const {
-      /* struct ::can_frame frame {};
-      if (::read(socket_, &frame, sizeof(struct ::can_frame)) < 0) {
-        throw SocketException(errno, std::generic_category(), "Interface '" + ifname_ + "' - Could not read CAN frame");
-      }
-      // We will only receive these frames if the corresponding error mask is set
-      // See https://github.com/linux-can/can-utils/blob/master/include/linux/can/error.h
-      if (frame.can_id & CAN_ERR_FLAG){
-        std::ostringstream ss {};
-        ss << frame;
-        if (frame.can_id & CAN_ERR_TX_TIMEOUT) {
-          throw TxTimeoutError("Send timeout");
-        } else if (frame.can_id & CAN_ERR_LOSTARB) {
-          throw LostArbitrationError("CAN frame '" + ss.str() + "'");
-        } else if (frame.can_id & CAN_ERR_CRTL) {
-          throw ControllerProblemError("CAN frame '" + ss.str() + "'");
-        } else if (frame.can_id & CAN_ERR_PROT) {
-          throw ProtocolViolationError("CAN frame '" + ss.str() + "'");
-        } else if (frame.can_id & CAN_ERR_TRX) {
-          throw TransceiverStatusError("CAN frame '" + ss.str() + "'");
-        } else if (frame.can_id & CAN_ERR_ACK) {
-          throw NoAcknowledgeError("No acknowledgement from receiver");
-        } else if (frame.can_id & CAN_ERR_BUSOFF) {
-          throw BusOffError("Bus off");
-        } else if (frame.can_id & CAN_ERR_BUSERROR) {
-          throw BusError("Bus error");
-        } else if (frame.can_id & CAN_ERR_RESTARTED) {
-          throw ControllerRestartedError("Controller restarted");
-        } else {
-          throw Exception("Unknown CAN protocol error: CAN frame '" + ss.str() + "'");
+    void canReceiver() {
+      // try to parse packet
+      int packetSize = CAN.parsePacket();
+
+      if (packetSize) {
+        // received a packet
+        Serial.print ("Received ");
+
+        if (CAN.packetExtended()) {
+          Serial.print ("extended ");
         }
+
+        if (CAN.packetRtr()) {
+          // Remote transmission request, packet contains no data
+          Serial.print ("RTR ");
+        }
+
+        Serial.print ("packet with id 0x");
+        Serial.print (CAN.packetId(), HEX);
+
+        if (CAN.packetRtr()) {
+          Serial.print (" and requested length ");
+          Serial.println (CAN.packetDlc());
+        } else {
+          Serial.print (" and length ");
+          Serial.println (packetSize);
+
+          // only print packet data for non-RTR packets
+          while (CAN.available()) {
+            Serial.print ((char) CAN.read());
+          }
+          Serial.println();
+        }
+
+        Serial.println();
+      } else {
+        Serial.println("No CAN frame available");
       }
-      std::array<std::uint8_t,8> data {};
-      std::copy(std::begin(frame.data), std::end(frame.data), std::begin(data));
-      Frame const f {frame.can_id, data};
-      return f; */
-      if (CAN.parsePacket() > 0) {  // Check if a packet is available
+    }
+
+    Frame Node::read() const {
+      Serial.println("Reading CAN frame");
+      int packetSize = CAN.parsePacket();
+      // wait for packet to be available
+      /* while (packetSize == 0)
+      {
+        vTaskDelay(1);
+        packetSize = CAN.parsePacket();
+      }
+      Serial.println("Got CAN frame"); */
+
+      if (packetSize) {  // Check if a packet is available
         std::uint32_t can_id = CAN.packetId();  // Get the CAN ID
         std::array<std::uint8_t, 8> data;
+        /* Serial.print("CAN ID: ");
+        Serial.println(can_id, HEX);
 
         // Read data from the packet
         for (int i = 0; i < CAN.available(); i++) {
             data[i] = CAN.read();
         }
 
+        Serial.print("Data: ");
+        for (int i = 0; i < 8; i++) {
+            Serial.print(data[i], HEX);
+            Serial.print(" ");
+        } */
+
+        Serial.print ("Received ");
+
+        if (CAN.packetExtended()) {
+          Serial.print ("extended ");
+        }
+
+        if (CAN.packetRtr()) {
+          // Remote transmission request, packet contains no data
+          Serial.print ("RTR ");
+        }
+
+        Serial.print ("packet with id 0x");
+        Serial.print (CAN.packetId(), HEX);
+
+        if (CAN.packetRtr()) {
+          Serial.print (" and requested length ");
+          Serial.println (CAN.packetDlc());
+        } else {
+          Serial.print (" and length ");
+          Serial.println (packetSize);
+
+          // only print packet data for non-RTR packets
+          while (CAN.available()) {
+            Serial.print ((char) CAN.read());
+          }
+          Serial.println();
+        }
+
+        Serial.println();
+
         // Return a Frame object with the CAN ID and data
         return Frame(can_id, data);
       }
+      Serial.println("No CAN frame available");
 
       // If no packet is available, throw an exception or handle it appropriately
-      throw std::runtime_error("No CAN frame available");
+      // throw std::runtime_error("No CAN frame available");
+      return Frame(0, {0, 0, 0, 0, 0, 0, 0, 0});
     }
 
     void Node::write(Frame const& frame) {
@@ -187,9 +244,19 @@ namespace myactuator_rmd {
       std::size_t dlc = data.size(); // Data length is the size of the array, should be 8
 
       // Start the CAN packet with CAN ID, DLC, and RTR (false for normal transmission)
-      if (CAN.beginPacket(can_id, dlc, false) == 0) {
+      /* if (CAN.beginPacket(can_id, dlc, true) == 0) {
           // Handle error: invalid CAN ID or DLC
           throw std::runtime_error("Failed to begin CAN packet");
+      } */
+      CAN.beginPacket(can_id);
+
+      //print the id and data
+      Serial.print("Sending CAN ID: ");
+      Serial.println(can_id, HEX);
+      Serial.print("Data: ");
+      for (std::size_t i = 0; i < dlc; ++i) {
+          Serial.print(data[i], HEX);
+          Serial.print(" ");
       }
 
       // Write the data array to the CAN packet

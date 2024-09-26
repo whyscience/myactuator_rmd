@@ -16,6 +16,7 @@
 #include "myactuator_rmd/protocol/responses.hpp"
 #include "myactuator_rmd/exceptions.hpp"
 
+#include "freertos/FreeRTOS.h"
 
 namespace myactuator_rmd {
 
@@ -124,6 +125,7 @@ namespace myactuator_rmd {
   std::uint32_t ActuatorInterface::getVersionDate() {
     GetVersionDateRequest const request {};
     GetVersionDateResponse const response {driver_.sendRecv(request, actuator_id_)};
+    // Serial.println("Received response");
     return response.getVersion();
   }
 

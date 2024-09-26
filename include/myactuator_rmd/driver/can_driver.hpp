@@ -29,7 +29,7 @@ namespace myactuator_rmd {
       /**\fn CanDriver
        * \brief
        *    Class constructor
-       * 
+       *
        * \param[in] ifname
        *    The name of the network interface that should communicated over
       */
