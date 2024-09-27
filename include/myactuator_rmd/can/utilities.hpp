@@ -14,7 +14,6 @@
 #include <ostream>
 #include <ratio>
 
-#include "linux_can.h"
 #include <sys/time.h>
 
 
@@ -29,7 +28,7 @@
  * \return
  *    The output stream containing information about the CAN frame
 */
-std::ostream& operator << (std::ostream& os, struct ::can_frame const& frame) noexcept;
+// std::ostream& operator << (std::ostream& os, struct ::can_frame const& frame) noexcept;
 
 namespace myactuator_rmd {
 
