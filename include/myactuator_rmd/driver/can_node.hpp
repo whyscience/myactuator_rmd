@@ -137,24 +137,28 @@ namespace myactuator_rmd {
     return;
   }
 
-  template <std::uint32_t SEND_ID_OFFSET, std::uint32_t RECEIVE_ID_OFFSET>
-  std::array<std::uint8_t,8> CanNode<SEND_ID_OFFSET,RECEIVE_ID_OFFSET>::sendRecv(Message const& request, std::uint32_t const actuator_id) {
-    auto const can_send_id {getCanSendId(actuator_id)};
-    Serial.println("Sending write");
-    //print the id and data
+  inline void printSendInfo(std::uint32_t const can_send_id, std::array<std::uint8_t,8> const& data) {
     Serial.print("sendRecv ID: ");
-    Serial.println(can_send_id, HEX);
-    Serial.print("Data: ");
-    for (int i = 0; i < request.getData().size(); i++) {
-      Serial.print(request.getData()[i], HEX);
+    Serial.print(can_send_id, HEX);
+    Serial.print(", Data: ");
+    for (int i = 0; i < data.size(); i++) {
+      Serial.print(data[i], HEX);
       Serial.print(" ");
     }
     Serial.println();
+  }
+
+  template <std::uint32_t SEND_ID_OFFSET, std::uint32_t RECEIVE_ID_OFFSET>
+  std::array<std::uint8_t,8> CanNode<SEND_ID_OFFSET,RECEIVE_ID_OFFSET>::sendRecv(Message const& request, std::uint32_t const actuator_id) {
+    auto const can_send_id {getCanSendId(actuator_id)};
+
+    //print the id and data
+    printSendInfo(can_send_id, request.getData());
+
     write(can_send_id, request.getData());
-    Serial.println("Sent write");
-    // return {0, 0, 0, 0, 0, 0, 0, 0};
+    // Serial.println("Sent write");
     can::Frame const frame {can::Node::read()};
-    Serial.println("Received read");
+    // Serial.println("Received read done");
     return frame.getData();
   }
 

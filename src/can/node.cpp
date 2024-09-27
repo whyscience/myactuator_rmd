@@ -30,55 +30,68 @@
 #include "myactuator_rmd/can/utilities.hpp"
 
 #include "freertos/FreeRTOS.h"
+#include <HardwareSerial.h>
 
-namespace myactuator_rmd {
-  namespace can {
+namespace myactuator_rmd
+{
+  namespace can
+  {
 
-    Node::Node(std::string const& ifname, std::chrono::microseconds const& send_timeout, std::chrono::microseconds const& receive_timeout,
+    Node::Node(std::string const &ifname, std::chrono::microseconds const &send_timeout, std::chrono::microseconds const &receive_timeout,
                bool const is_signal_errors)
     {
-      //initSocket(ifname);
-      //setSendTimeout(send_timeout);
-      //setRecvTimeout(receive_timeout);
-      //setErrorFilters(is_signal_errors);
+      // initSocket(ifname);
+      // setSendTimeout(send_timeout);
+      // setRecvTimeout(receive_timeout);
+      // setErrorFilters(is_signal_errors);
       return;
     }
 
-    Node::~Node() {
-      //closeSocket();
+    Node::~Node()
+    {
+      // closeSocket();
       return;
     }
 
     // ESP32SJA1000Class::loopback()
-    void Node::setLoopback(bool const is_loopback) {
-      if (is_loopback) {
-        CAN0.setNoACKMode(true);  // Loopback without ACK
-      } else {
+    void Node::setLoopback(bool const is_loopback)
+    {
+      if (is_loopback)
+      {
+        CAN0.setNoACKMode(true); // Loopback without ACK
+      }
+      else
+      {
         CAN0.setNoACKMode(false); // Normal mode with ACK
       }
     }
 
     // int ESP32SJA1000Class::filter(int id, int mask)
-    void Node::setRecvFilter(std::vector<std::uint32_t> const& can_ids, bool const is_invert) {
+    void Node::setRecvFilter(std::vector<std::uint32_t> const &can_ids, bool const is_invert)
+    {
       // Reset filters to accept all by default
       twai_filter_config_t twai_filters_cfg = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
       // Iterate over can_ids and configure filters
-      for (std::size_t i = 0; i < can_ids.size(); ++i) {
-          uint32_t id = can_ids[i];
-          if (is_invert) {
-              // Implement custom filter logic for inverted filters (not directly supported in TWAI)
-              twai_filters_cfg.acceptance_code = ~id;
-              twai_filters_cfg.acceptance_mask = CAN_SFF_MASK;
-          } else {
-              twai_filters_cfg.acceptance_code = id;
-              twai_filters_cfg.acceptance_mask = CAN_SFF_MASK;
-          }
+      for (std::size_t i = 0; i < can_ids.size(); ++i)
+      {
+        uint32_t id = can_ids[i];
+        if (is_invert)
+        {
+          // Implement custom filter logic for inverted filters (not directly supported in TWAI)
+          twai_filters_cfg.acceptance_code = ~id;
+          twai_filters_cfg.acceptance_mask = CAN_SFF_MASK;
+        }
+        else
+        {
+          twai_filters_cfg.acceptance_code = id;
+          twai_filters_cfg.acceptance_mask = CAN_SFF_MASK;
+        }
       }
 
       // Reinstall the driver with the new filter settings
       CAN0.disable();
-      CAN0.enable();  // This will apply the new filter configuration
+      CAN0.enable(); // This will apply the new filter configuration
     }
 
     /*void Node::setSendTimeout(std::chrono::microseconds const& timeout) {
@@ -101,7 +114,7 @@ namespace myactuator_rmd {
       // See https://github.com/linux-can/can-utils/blob/master/include/linux/can/error.h
       ::can_err_mask_t err_mask {};
       /* if (is_signal_errors) {
-        err_mask = (CAN_ERR_TX_TIMEOUT | CAN_ERR_LOSTARB | CAN_ERR_CRTL | CAN_ERR_PROT | CAN_ERR_TRX | 
+        err_mask = (CAN_ERR_TX_TIMEOUT | CAN_ERR_LOSTARB | CAN_ERR_CRTL | CAN_ERR_PROT | CAN_ERR_TRX |
                     CAN_ERR_ACK | CAN_ERR_BUSOFF | CAN_ERR_BUSERROR | CAN_ERR_RESTARTED);
       }
       if (::setsockopt(socket_, SOL_CAN_RAW, CAN_RAW_ERR_FILTER, &err_mask, sizeof(::can_err_mask_t)) < 0) {
@@ -110,34 +123,65 @@ namespace myactuator_rmd {
       return;
     }*/
 
-    Frame Node::read() const {
+    void printFrameNode(CAN_FRAME *message)
+    {
+      Serial.print(message->id, HEX);
+      if (message->extended)
+        Serial.print(" Extended, len: ");
+      else
+        Serial.print(" Standard, len: "); // standard frame
+      Serial.print(message->length, DEC);
+      Serial.print(", ");
+      for (int i = 0; i < message->length; i++)
+      {
+        Serial.print(message->data.byte[i], HEX);
+        Serial.print(" ");
+      }
+      Serial.println();
+    }
+
+    Frame Node::read() const
+    {
       Serial.println("Reading CAN frame");
-      twai_message_t message;
-      if (twai_receive(&message, pdMS_TO_TICKS(100)) == ESP_OK) {
-          Serial.println("Received CAN frame");
-          std::array<std::uint8_t, 8> data {};
-          std::copy(std::begin(message.data), std::end(message.data), std::begin(data));
-          return Frame(message.identifier, data);  // Adapted for your Frame class
-      } else {
-          Serial.println("Error reading CAN frame");
-          // throw SocketException(errno, std::generic_category(), "Error reading CAN frame");
-          return Frame(0, {0, 0, 0, 0, 0, 0, 0, 0});
+
+      CAN_FRAME rxFrame;
+      int time_ms = 0;
+      while(!CAN0.available() && timeout_ms > time_ms++) {
+        delay(1);
+      }
+      if (CAN0.available())
+      {
+        CAN0.read(rxFrame);
+        Serial.print("Received frame!  ");
+        printFrameNode(&rxFrame);
+        std::array<std::uint8_t, 8> data{};
+        std::copy(std::begin(rxFrame.data.byte), std::end(rxFrame.data.byte), std::begin(data));
+        return Frame(rxFrame.id, data); // Adapted for your Frame class
+      }
+      else
+      {
+        Serial.println("Error reading CAN frame");
+        return Frame{0, {0, 0, 0, 0, 0, 0, 0, 0}};
       }
     }
 
-    void Node::write(Frame const& frame) {
+    void Node::write(Frame const &frame)
+    {
       CAN_FRAME txFrame;
       txFrame.id = frame.getId();
       txFrame.length = frame.getData().size();
       std::copy(frame.getData().begin(), frame.getData().end(), std::begin(txFrame.data.byte));
 
-      if (!CAN0.sendFrame(txFrame)) {
-          throw SocketException(errno, std::generic_category(), "Error writing CAN frame");
+      if (!CAN0.sendFrame(txFrame))
+      {
+        Serial.println("Error writing CAN frame");
+        throw SocketException(errno, std::generic_category(), "Error writing CAN frame");
       }
     }
 
-    void Node::write(std::uint32_t const can_id, std::array<std::uint8_t,8> const& data) { // write to CAN bus
-      Frame frame {can_id, data};
+    void Node::write(std::uint32_t const can_id, std::array<std::uint8_t, 8> const &data)
+    { // write to CAN bus
+      Frame frame{can_id, data};
       write(frame);
     }
 

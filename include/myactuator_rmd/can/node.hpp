@@ -149,6 +149,7 @@ namespace myactuator_rmd {
 
         // std::string ifname_;
         // int socket_;
+        int timeout_ms = 1000;
     };
 
   }
