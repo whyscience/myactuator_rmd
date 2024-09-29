@@ -19,6 +19,22 @@
 #include "myactuator_rmd/can/frame.hpp"
 #include <esp32_can.h>
 
+inline void printFrame(CAN_FRAME *message)
+{
+  Serial.print(message->id, HEX);
+  if (message->extended)
+    Serial.print(" Ext, len: ");
+  else
+    Serial.print(" Std, len: "); // standard frame
+  Serial.print(message->length, DEC);
+  Serial.print(", ");
+  for (int i = 0; i < message->length; i++)
+  {
+    Serial.print(message->data.byte[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
+}
 
 namespace myactuator_rmd {
   namespace can {

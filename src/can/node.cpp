@@ -129,23 +129,6 @@ namespace myactuator_rmd
       return;
     }*/
 
-    void printFrameNode(CAN_FRAME *message)
-    {
-      Serial.print(message->id, HEX);
-      if (message->extended)
-        Serial.print(" Extended, len: ");
-      else
-        Serial.print(" Standard, len: "); // standard frame
-      Serial.print(message->length, DEC);
-      Serial.print(", ");
-      for (int i = 0; i < message->length; i++)
-      {
-        Serial.print(message->data.byte[i], HEX);
-        Serial.print(" ");
-      }
-      Serial.println();
-    }
-
     Frame Node::read() const
     {
       // Serial.println("Reading CAN frame");
@@ -159,7 +142,7 @@ namespace myactuator_rmd
       {
         CAN0.read(rxFrame);
         Serial.print("Received frame!  ");
-        printFrameNode(&rxFrame);
+        printFrame(&rxFrame);
         std::array<std::uint8_t, 8> data{};
         std::copy(std::begin(rxFrame.data.byte), std::end(rxFrame.data.byte), std::begin(data));
         return Frame(rxFrame.id, data); // Adapted for your Frame class
