@@ -132,6 +132,7 @@ namespace myactuator_rmd
     Frame Node::read() const
     {
       // Serial.println("Reading CAN frame");
+      // return Frame{0, {0, 0, 0, 0, 0, 0, 0, 0}};
 
       CAN_FRAME rxFrame;
       int time_ms = 0;
@@ -141,7 +142,6 @@ namespace myactuator_rmd
       if (CAN0.available())
       {
         CAN0.read(rxFrame);
-        Serial.print("Received frame!  ");
         printFrame(&rxFrame);
         std::array<std::uint8_t, 8> data{};
         std::copy(std::begin(rxFrame.data.byte), std::end(rxFrame.data.byte), std::begin(data));

@@ -21,6 +21,7 @@
 
 inline void printFrame(CAN_FRAME *message)
 {
+  Serial.print("received ID: ");
   Serial.print(message->id, HEX);
   if (message->extended)
     Serial.print(" Ext, len: ");

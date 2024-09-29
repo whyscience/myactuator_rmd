@@ -18,6 +18,7 @@
 #include "myactuator_rmd/protocol/command_type.hpp"
 #include "myactuator_rmd/protocol/message.hpp"
 #include "myactuator_rmd/exceptions.hpp"
+#include <HardwareSerial.h>
 
 
 namespace myactuator_rmd {
@@ -53,7 +54,9 @@ namespace myactuator_rmd {
     if (data[0] != C) {
       std::stringstream ss {};
       ss << std::showbase << std::hex << static_cast<std::uint16_t>(data[0]);
-      throw ProtocolException("Unexpected response '" + ss.str() + "'");
+      // the first byte should be the command type, otr it will crash
+      Serial.println("Error Unexpected response");
+      // throw ProtocolException("Unexpected response '" + ss.str() + "'");
     }
     return;
   }
