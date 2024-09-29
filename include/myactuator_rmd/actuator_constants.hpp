@@ -15,6 +15,48 @@
 
 
 namespace myactuator_rmd {
+  /// < L-Series actuators
+
+  // 额定电压 Nominal Voltage V 12~24
+  // 额定电流 Nominal Current A 3.62
+  // 额定扭矩 Nominal Torque N.M 1
+  // 额定转速 Nominal Speed RPM 580
+  // 最大空载转速 Max Speed RPM 805
+  // 最大瞬时扭矩 Max Instant Torque N.M 3.8
+  // 最大瞬时电流Max Instant Current A 15
+  // 线电阻 Line Resistance Ω 1.14
+  // 接线方式 Wire Connect - Y
+  // 相间电感 Phase to Phase Inductance mH 1.25
+  // 转速常数 Speed Constant RPM/V 34
+  // 扭矩常数 Torque Constant N.M/A 0.28
+  // 转子惯量 Rotor Inertiag cm2 933
+  // 极对数 Number of Pole Pairs - 14
+  // 电机重量 Motor Weight g 360
+  // 工作温度范围 Working Temperature ℃ （-20 ~ 80 ℃）
+  // 最高退磁温度 Max Demagnetize Temperature ℃ 120℃
+  // 控制精度 Control Precision ° 0.001°
+
+  // 适配驱动器 Matched Driver - 适配驱动器 Matched Driver
+  // 适配驱动类型 Drive V MC200
+  // 驱动器输入电压范围 Input Voltage A 12~24
+  // 驱动器电流范围 Current W Normal:8A Instant:15A
+  // 额定功率 Normminal Power - 200
+  // 编码器精度 Encoder - 18-bit magnetic encoder
+  // 通信方式及波特率 Communication method and baud rate - CAN BUS :1M ; RS485: 115200/500k/1M/2.5M
+  // 控制模式 control mode  Torque loop(current loop) / speed loop/position loop
+  class L_7015 { // Direct Drive Module
+    public:
+      static constexpr float reducer_ratio {1/1}; // Direct Drive Module 无减速比
+      static constexpr float no_load_speed {805}; // in rpm
+      static constexpr float rated_speed {580}; // in rpm
+      static constexpr float rated_current {3.62}; // in A
+      static constexpr float rated_power {200}; // in W
+      static constexpr float rated_torque {1}; // in Nm
+      static constexpr float speed_constant {34}; // in rpm/V
+      static constexpr float torque_constant {0.28}; // in Nm/A
+      static constexpr float rotor_inertia {933}; // in gcm2
+      static constexpr std::int16_t number_of_pole_pairs {14};
+  };
 
   ///< X4-series actuators
 
