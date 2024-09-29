@@ -33,12 +33,12 @@ namespace myactuator_rmd {
        * \param[in] ifname
        *    The name of the network interface that should communicated over
       */
-      CanDriver(std::string const& ifname)
+      CanDriver(std::string const& ifname = "dummy")
       : CanNode{ifname} {
         return;
       }
 
-      CanDriver() = delete;
+      // CanDriver() = delete;
       CanDriver(CanDriver const&) = delete;
       CanDriver& operator = (CanDriver const&) = default;
       CanDriver(CanDriver&&) = default;
