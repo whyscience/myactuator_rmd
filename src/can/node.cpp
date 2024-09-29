@@ -148,11 +148,11 @@ namespace myactuator_rmd
 
     Frame Node::read() const
     {
-      Serial.println("Reading CAN frame");
+      // Serial.println("Reading CAN frame");
 
       CAN_FRAME rxFrame;
       int time_ms = 0;
-      while(!CAN0.available() && timeout_ms > time_ms++) {
+      while(!CAN0.available() && time_ms++ < timeout_ms) {
         delay(1);
       }
       if (CAN0.available())
